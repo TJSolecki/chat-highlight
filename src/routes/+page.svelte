@@ -1,9 +1,29 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	let open = $state(true);
+
+	$effect(() => {
+		const listener = () => {
+			open = localStorage.getItem('open') === 'true';
+		};
+		window.addEventListener('storage', listener);
+		return () => {
+			removeEventListener('storage', listener);
+		};
+	});
+
+	function openPopup() {
+		window.open('/chat', '_blank');
+	}
+
+	function setOpen(value: boolean): void {
+		open = value;
+		localStorage.setItem('open', String(value));
+	}
 </script>
 
-<button class="border p-2 hover:cursor-pointer" onclick={() => (open = !open)}>toggle open</button>
+<button class="border p-2 hover:cursor-pointer" onclick={openPopup}>open popup</button>
+<button class="border p-2 hover:cursor-pointer" onclick={() => setOpen(!open)}>toggle open</button>
 
 {#if open}
 	<div
