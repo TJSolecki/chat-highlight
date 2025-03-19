@@ -28,7 +28,6 @@ function connectToChat(
     controller: ReadableStreamDefaultController,
 ) {
     ws.addEventListener("open", () => {
-        console.log("Connected to Twitch Chat!");
         ws.send("CAP REQ :twitch.tv/commands twitch.tv/tags"); // Request commands and tags
         ws.send(`PASS oauth:${accessToken}`); // Authenticate (replace with your token)
         ws.send(`NICK justinfan${Math.floor(Math.random() * 99999)}`); // Use a "justinfan" nickname (anonymous)
@@ -74,6 +73,6 @@ function closeController(controller: ReadableStreamDefaultController) {
     try {
         controller.close();
     } catch {
-        console.log("already closed");
+        // ignore
     }
 }
