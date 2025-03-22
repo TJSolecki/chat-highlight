@@ -49,18 +49,11 @@
             const chat: Chat = JSON.parse(event.data);
             chats.push(chat);
             if (autoScroll) {
-                window.scrollTo(0, document.body.scrollHeight);
+                setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 0);
             }
         }
         eventSource.addEventListener("chat", handleMessage);
 
-        document.addEventListener("scroll", () => {
-            const lastScrollPosition = window.scrollY;
-            console.log(window.scrollY, document.body.scrollHeight);
-            autoScroll =
-                lastScrollPosition <= document.body.scrollHeight + 5 ||
-                lastScrollPosition >= document.body.scrollHeight + 5;
-        });
         return () => {
             eventSource.close();
         };
@@ -73,20 +66,18 @@
 </script>
 
 <div class="min-h-screen bg-zinc-900">
-    <h1
-        class="sticky top-0 z-10 flex justify-center border-b border-zinc-800 bg-zinc-900 py-4 text-xs font-bold text-white"
-    >
-        {data.username.toUpperCase()}'S STREAM CHAT
-    </h1>
+    <div class="sticky top-0 z-10 flex justify-center border-b border-zinc-800 bg-zinc-900 py-4">
+        <h1 class="text-xs font-bold text-white">{data.username.toUpperCase()}'S STREAM CHAT</h1>
+    </div>
     <ol class="flex flex-col">
         {#each chats as chat (chat.id)}
-            <li
+            <button
                 onclick={() => setActiveChat(chat)}
                 id={chat.id}
-                class="px-4 py-2 text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
+                class="w-full px-4 py-2 text-left text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
             >
                 <span style="color: {getColor(chat)}">{chat.username}</span>: {chat.chat}
-            </li>
+            </button>
         {/each}
     </ol>
 </div>
