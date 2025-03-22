@@ -45,12 +45,14 @@ function connectToChat(
         // Parse chat messages
         if (message.includes("PRIVMSG")) {
             const parts = message.split(" :");
-            const chatMessage = parts[2];
+            const metadata = parseMetadata(parts[0]);
+            const chat = parts[2];
             const userInfo = parts[1].split("!");
             const username = userInfo[0].substring(userInfo[0].lastIndexOf(":") + 1);
+            const id = crypto.randomUUID();
 
             try {
-                controller.enqueue(`chat: ${username}: ${chatMessage}\n\n`);
+                controller.enqueue(`event: chat\ndata: ${JSON.stringify({ id, username, chat, ...metadata })}\n\n`);
             } catch {
                 closeController(controller);
                 ws.close();
@@ -67,6 +69,14 @@ function connectToChat(
         controller.error(error);
         ws.close();
     });
+}
+
+function parseMetadata(metadata: string): Record<string, string> {
+    const entries = metadata
+        .split(";")
+        .map((keyValue) => [keyValue.slice(0, keyValue.indexOf("=")), keyValue.slice(keyValue.indexOf("=") + 1)])
+        .filter(([_, value]) => value.length);
+    return Object.fromEntries(entries);
 }
 
 function closeController(controller: ReadableStreamDefaultController) {
