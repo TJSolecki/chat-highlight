@@ -35,6 +35,8 @@
 </script>
 
 <script lang="ts">
+    import { ExternalLink } from "lucide-svelte/icons";
+    import { chatState } from "$lib/chat-state.svelte";
     type Props = {
         /** The username of the twitch streamer you want to see the live chat for. */
         data: { username: string };
@@ -60,14 +62,21 @@
     });
 
     function setActiveChat(chat: Chat) {
-        localStorage.removeItem("highlightedChat");
-        localStorage.setItem("highlightedChat", JSON.stringify(chat));
+        chatState.highlightChat(chat);
     }
 </script>
 
 <div class="min-h-screen bg-zinc-900">
-    <div class="sticky top-0 z-10 flex justify-center border-b border-zinc-800 bg-zinc-900 py-4">
+    <div class="sticky top-0 z-10 flex h-12 justify-center border-b border-zinc-800 bg-zinc-900 py-4">
         <h1 class="text-xs font-bold text-white">{data.username.toUpperCase()}'S STREAM CHAT</h1>
+        <div class="absolute top-0 flex h-12 w-full items-center justify-end px-[6px]">
+            <button
+                onclick={() => {
+                    window.open("/highlight", "Chroma-key me to see highlighted chats", "width=800,height=800");
+                }}
+                class="rounded p-2 text-white hover:cursor-pointer hover:bg-zinc-800"><ExternalLink /></button
+            >
+        </div>
     </div>
     <ol class="flex flex-col">
         {#each chats as chat (chat.id)}
