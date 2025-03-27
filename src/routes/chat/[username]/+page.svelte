@@ -35,8 +35,9 @@
 </script>
 
 <script lang="ts">
-    import { ExternalLink } from "lucide-svelte/icons";
+    import { ExternalLink, Pause } from "lucide-svelte/icons";
     import { chatState } from "$lib/chat-state.svelte";
+    import { fade } from "svelte/transition";
     type Props = {
         /** The username of the twitch streamer you want to see the live chat for. */
         data: { username: string };
@@ -52,7 +53,7 @@
             const chat: Chat = JSON.parse(event.data);
             chats.push(chat);
             if (autoScroll) {
-                setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 0);
+                setTimeout(() => scrollToBottomOfChat(), 0);
             }
         }
         eventSource.addEventListener("chat", handleMessage);
@@ -76,6 +77,10 @@
             window.removeEventListener("scroll", toggleAutoScroll);
         };
     });
+
+    function scrollToBottomOfChat() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
 
     function isScrolledToBottomOfChat(): boolean {
         const windowHeight = window.innerHeight;
@@ -106,10 +111,21 @@
             <button
                 onclick={() => setActiveChat(chat)}
                 id={chat.id}
-                class="w-full px-4 py-2 text-left text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
+                class="w-full px-4 py-1 text-left text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
             >
                 <span style="color: {getColor(chat)}">{chat.username}</span>: {chat.chat}
             </button>
         {/each}
     </ol>
+    {#if !autoScroll}
+        <button
+            transition:fade={{ duration: 100 }}
+            class="fixed bottom-4 left-1/2 flex -translate-x-1/2 transform items-center gap-2 rounded-md
+            border-3 border-zinc-800 bg-zinc-900/80 p-2 text-[0.825rem] text-white backdrop-blur-xs
+            hover:cursor-pointer"
+            onclick={scrollToBottomOfChat}
+        >
+            <Pause /> Chat paused
+        </button>
+    {/if}
 </div>
