@@ -44,6 +44,7 @@
     const { data }: Props = $props();
     let chats = $state<Chat[]>([]);
     let autoScroll = $state(true);
+    let lastScrollY = $state(0);
 
     $effect(() => {
         const eventSource = new EventSource(`/api/twitch/chat/${data.username}`);
@@ -61,7 +62,29 @@
         };
     });
 
-    function setActiveChat(chat: Chat) {
+    $effect(() => {
+        function toggleAutoScroll(): void {
+            if (isScrolledToBottomOfChat()) {
+                autoScroll = true;
+            } else if (window.scrollY < lastScrollY) {
+                autoScroll = false;
+            }
+            lastScrollY = Math.max(0, window.scrollY);
+        }
+        window.addEventListener("scroll", toggleAutoScroll);
+        return () => {
+            window.removeEventListener("scroll", toggleAutoScroll);
+        };
+    });
+
+    function isScrolledToBottomOfChat(): boolean {
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const buffer = 1;
+        return window.scrollY + windowHeight >= documentHeight - buffer;
+    }
+
+    function setActiveChat(chat: Chat): void {
         chatState.highlightChat(chat);
     }
 </script>
