@@ -35,7 +35,7 @@
 </script>
 
 <script lang="ts">
-    import { ExternalLink, Pause } from "lucide-svelte/icons";
+    import { ExternalLink, Pause, Repeat2 } from "lucide-svelte/icons";
     import { chatState } from "$lib/chat-state.svelte";
     import { fade } from "svelte/transition";
     type Props = {
@@ -97,7 +97,11 @@
 <div class="min-h-screen bg-zinc-900">
     <div class="sticky top-0 z-10 flex h-12 justify-center border-b border-zinc-800 bg-zinc-900 py-4">
         <h1 class="text-xs font-bold text-white">{data.username.toUpperCase()}'S STREAM CHAT</h1>
-        <div class="absolute top-0 flex h-12 w-full items-center justify-end px-[6px]">
+        <div class="absolute top-0 flex h-12 w-full items-center justify-between px-[6px]">
+            <button
+                onclick={() => chatState.replayLastChat()}
+                class="rounded p-2 text-white hover:cursor-pointer hover:bg-zinc-800"><Repeat2 /></button
+            >
             <button
                 onclick={() => {
                     window.open("/highlight", "Chroma-key me to see highlighted chats", "width=800,height=800");

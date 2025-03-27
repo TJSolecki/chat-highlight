@@ -34,6 +34,9 @@ class ChatState {
     }
 
     replayLastChat() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
         if (this.chat) {
             this.#addNewChat(this.chat);
         }
