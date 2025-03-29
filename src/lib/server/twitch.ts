@@ -23,7 +23,7 @@ export async function getAccessToken(): Promise<string> {
     }
 }
 
-export async function getUserId(channelName: string, accessToken: string) {
+export async function getUsers(channelName: string, accessToken: string) {
     const url = `https://api.twitch.tv/helix/users?login=${channelName}`;
     const response = await fetch(url, {
         headers: {
@@ -31,14 +31,10 @@ export async function getUserId(channelName: string, accessToken: string) {
             Authorization: `Bearer ${accessToken}`,
         },
     });
-
-    const data = await response.json();
-
-    console.log(data);
-
-    if (data.data && data.data.length > 0) {
-        return data.data[0].id;
+    if (response.ok) {
+        return await response.json();
     } else {
-        throw new Error(`Could not find user ID for channel: ${channelName}`);
+        console.error(response);
+        throw new Error(await response.text());
     }
 }
