@@ -1,5 +1,5 @@
 <script lang="ts" module>
-    export type Chat = { id: string; username: string; chat: string; color: string };
+    export type Chat = { id: string; username: string; chat: (string | EmoteLink)[]; color: string };
     const COLORS = [
         "#0000FF",
         "#FF0000",
@@ -38,6 +38,7 @@
     import { ExternalLink, Pause, Repeat2 } from "lucide-svelte/icons";
     import { chatState } from "$lib/chat-state.svelte";
     import { fade } from "svelte/transition";
+    import type { EmoteLink } from "$lib/fetcher";
     type Props = {
         /** The username of the twitch streamer you want to see the live chat for. */
         data: { username: string };
@@ -117,7 +118,16 @@
                 id={chat.id}
                 class="w-full px-4 py-1 text-left text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
             >
-                <span style="color: {getColor(chat)}">{chat.username}</span>: {chat.chat}
+                <span class="inline-flex max-w-full flex-wrap items-center gap-1">
+                    <span><span style="color: {getColor(chat)}">{chat.username}</span>:</span>
+                    {#each chat.chat as token, i (i)}
+                        {#if typeof token === "string"}
+                            <span>{token}</span>
+                        {:else}
+                            <img class="h-6" alt={token.name} src={token.href} />
+                        {/if}
+                    {/each}
+                </span>
             </button>
         {/each}
     </ol>

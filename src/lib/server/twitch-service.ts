@@ -9,12 +9,19 @@ export type UserData = {
     profile_image_url: string;
 };
 
+type Options = {
+    retries?: number;
+    accessToken?: string;
+};
+
 class TwitchService {
     #accessToken: string | undefined;
     constructor() {}
 
-    async getUsers(channelName: string, retries: number = 1): Promise<UserData[]> {
-        if (!this.#accessToken) {
+    async getUsers(channelName: string, { retries = 1, accessToken }: Options): Promise<UserData[]> {
+        if (accessToken) {
+            this.#accessToken = accessToken;
+        } else if (!this.#accessToken) {
             this.#accessToken = await getAccessToken();
         }
         const url = `https://api.twitch.tv/helix/users?login=${channelName}`;
@@ -29,7 +36,7 @@ class TwitchService {
         } else {
             if (response.status === 401 && retries > 0) {
                 this.#accessToken = await getAccessToken();
-                return await this.getUsers(channelName);
+                return await this.getUsers(channelName, { retries: retries - 1 });
             }
             console.error(response);
             throw new Error(await response.text());

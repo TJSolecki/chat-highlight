@@ -1,11 +1,19 @@
 import { getAccessToken } from "$lib/server/twitch";
+import { twitchService } from "$lib/server/twitch-service";
+import { emoteFetcherService } from "$lib/fetcher";
 
 export async function GET({ params }: { params: { username: string } }) {
     const accessToken = await getAccessToken();
+    const users = await twitchService.getUsers(params.username, { accessToken });
+    if (!users.length) {
+        return new Response("No Twitch channel exists for a user with the name: " + params.username, { status: 404 });
+    }
+    const userId = users[0].id;
+    await emoteFetcherService.fetchEmotesForChannel(userId);
     const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
     const stream = new ReadableStream({
         start(controller) {
-            connectToChat(params.username, ws, accessToken, controller);
+            connectToChat(params.username, ws, accessToken, controller, userId);
         },
         cancel() {
             ws.close();
@@ -26,6 +34,7 @@ function connectToChat(
     ws: WebSocket,
     accessToken: string,
     controller: ReadableStreamDefaultController,
+    userId: number,
 ) {
     ws.addEventListener("open", () => {
         ws.send("CAP REQ :twitch.tv/commands twitch.tv/tags"); // Request commands and tags
@@ -46,7 +55,7 @@ function connectToChat(
         if (message.includes("PRIVMSG")) {
             const parts = message.split(" :");
             const metadata = parseMetadata(parts[0]);
-            const chat = parts[2];
+            const chat = emoteFetcherService.parseChat(parts[2], userId);
             const userInfo = parts[1].split("!");
             const username = userInfo[0].substring(userInfo[0].lastIndexOf(":") + 1);
             const id = crypto.randomUUID();
