@@ -22,19 +22,3 @@ export async function getAccessToken(): Promise<string> {
         throw new Error(await response.text());
     }
 }
-
-export async function getUsers(channelName: string, accessToken: string) {
-    const url = `https://api.twitch.tv/helix/users?login=${channelName}`;
-    const response = await fetch(url, {
-        headers: {
-            "Client-ID": CLIENT_ID,
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-    if (response.ok) {
-        return await response.json();
-    } else {
-        console.error(response);
-        throw new Error(await response.text());
-    }
-}
