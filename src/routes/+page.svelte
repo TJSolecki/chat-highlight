@@ -9,17 +9,17 @@
     let username = $state("");
 </script>
 
-<div class="mx-auto flex h-full min-h-screen justify-center bg-zinc-900 px-8">
+<div class="mx-auto flex h-full min-h-screen items-center justify-center bg-zinc-900 px-8">
     <form class="flex w-full max-w-2xl flex-col gap-4" method="GET" action="/chat/{username}">
         <div>
-            <h1>
+            <h1 class="min-h p-0">
                 Highlight your <span class="gap-2 text-purple-500">chatters.</span>
                 <span class="inline-block">
                     <img alt="classic" src={duckSmokeLink} />
                 </span>
             </h1>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 pb-12">
             <input
                 type="text"
                 bind:value={username}
