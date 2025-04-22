@@ -5,9 +5,10 @@
 
 <script lang="ts">
     import { fly } from "svelte/transition";
-    import { getColor, type Chat } from "../chat/[username]/+page.svelte";
+    import type { ChatData } from "../chat/[username]/+page.svelte";
+    import Chat from "$lib/components/chat.svelte";
 
-    let chat = $state<Chat>();
+    let chat = $state<ChatData>();
 
     $effect(() => {
         const listener = () => {
@@ -27,18 +28,7 @@
 </script>
 
 {#if chat}
-    <div class="fixed right-8 bottom-8 max-w-sm bg-zinc-900 p-4" transition:fly={{ x: 200, duration: 500 }}>
-        <div id={chat.id} class="text-[0.825rem] font-semibold text-white">
-            <span class="inline-flex max-w-full flex-wrap items-center gap-1">
-                <span><span style="color: {getColor(chat)}">{chat.username}</span>:</span>
-                {#each chat.chat as token, i (i)}
-                    {#if typeof token === "string"}
-                        <span>{token}</span>
-                    {:else}
-                        <img class="h-6" alt={token.name} src={token.href} />
-                    {/if}
-                {/each}
-            </span>
-        </div>
+    <div class="fixed right-8 bottom-8 max-w-sm rounded bg-zinc-900 p-4" transition:fly={{ x: 200, duration: 500 }}>
+        <Chat {chat} />
     </div>
 {/if}

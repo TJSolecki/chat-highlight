@@ -1,37 +1,19 @@
 <script lang="ts" module>
-    export type Chat = { id: string; username: string; chat: (string | EmoteLink)[]; color: string };
-    const COLORS = [
-        "#0000FF",
-        "#FF0000",
-        "#8A2BE2",
-        "#FF69B4",
-        "#1E90FF",
-        "#008000",
-        "#00FF7F",
-        "#B22222",
-        "#DAA520",
-        "#FF4500",
-        "#2E8B57",
-        "#5F9EA0",
-        "#D2691E",
-    ] as const;
+    export type Badge = {
+        image_url_1x: string;
+        image_url_2x: string;
+        image_url_4x: string;
+        title: string;
+    };
 
-    export function getColor(chat: Chat) {
-        if (chat.color) {
-            return chat.color;
-        }
-        return COLORS[stringToHash(chat.username) % COLORS.length];
-    }
-
-    function stringToHash(str: string) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash |= 0; // Convert to 32bit integer
-        }
-        return Math.abs(hash);
-    }
+    export type ChatData = {
+        id: string;
+        username: string;
+        chat: (string | EmoteLink)[];
+        color: string;
+        "display-name": string;
+        badges: Badge[];
+    };
 </script>
 
 <script lang="ts">
@@ -39,19 +21,20 @@
     import { chatState } from "$lib/chat-state.svelte";
     import { fade } from "svelte/transition";
     import type { EmoteLink } from "$lib/fetcher";
+    import Chat from "$lib/components/chat.svelte";
     type Props = {
         /** The username of the twitch streamer you want to see the live chat for. */
         data: { username: string };
     };
     const { data }: Props = $props();
-    let chats = $state<Chat[]>([]);
+    let chats = $state<ChatData[]>([]);
     let autoScroll = $state(true);
     let lastScrollY = $state(0);
 
     $effect(() => {
         const eventSource = new EventSource(`/api/twitch/chat/${data.username}`);
         function handleMessage(event: MessageEvent) {
-            const chat: Chat = JSON.parse(event.data);
+            const chat: ChatData = JSON.parse(event.data);
             chats.push(chat);
             if (autoScroll) {
                 setTimeout(() => scrollToBottomOfChat(), 0);
@@ -90,7 +73,7 @@
         return window.scrollY + windowHeight >= documentHeight - buffer;
     }
 
-    function setActiveChat(chat: Chat): void {
+    function setActiveChat(chat: ChatData): void {
         chatState.highlightChat(chat);
     }
 </script>
@@ -111,23 +94,14 @@
             >
         </div>
     </div>
-    <ol class="flex flex-col">
+    <ol class="flex w-full flex-col">
         {#each chats as chat (chat.id)}
             <button
                 onclick={() => setActiveChat(chat)}
                 id={chat.id}
-                class="w-full px-4 py-1 text-left text-[0.825rem] font-semibold text-white hover:bg-zinc-800"
+                class="w-full px-4 py-1 text-left hover:bg-zinc-800"
             >
-                <span class="inline-flex max-w-full flex-wrap items-center gap-1">
-                    <span><span style="color: {getColor(chat)}">{chat.username}</span>:</span>
-                    {#each chat.chat as token, i (i)}
-                        {#if typeof token === "string"}
-                            <span>{token}</span>
-                        {:else}
-                            <img class="h-6" alt={token.name} src={token.href} />
-                        {/if}
-                    {/each}
-                </span>
+                <Chat {chat} />
             </button>
         {/each}
     </ol>

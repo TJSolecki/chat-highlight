@@ -1,16 +1,16 @@
-import type { Chat } from "../routes/chat/[username]/+page.svelte";
+import type { ChatData } from "../routes/chat/[username]/+page.svelte";
 import { OUT_DURATION_MS } from "../routes/highlight/+page.svelte";
 
 export const HIGHLIGHTED_CHAT_KEY = "highlightedChat";
 const CHAT_DURATION_MS = 15_000;
 
 class ChatState {
-    chat = $state<Chat>();
+    chat = $state<ChatData>();
     timeout = $state<number>();
 
     constructor() {}
 
-    highlightChat(chat: Chat) {
+    highlightChat(chat: ChatData) {
         if (this.timeout) {
             this.dismissCurrentChat();
             setTimeout(() => this.#addNewChat(chat), OUT_DURATION_MS);
@@ -19,7 +19,7 @@ class ChatState {
         }
     }
 
-    #addNewChat(chat: Chat) {
+    #addNewChat(chat: ChatData) {
         this.chat = chat;
         localStorage.setItem(HIGHLIGHTED_CHAT_KEY.toString(), JSON.stringify(chat));
         this.timeout = setTimeout(() => this.dismissCurrentChat(), CHAT_DURATION_MS);

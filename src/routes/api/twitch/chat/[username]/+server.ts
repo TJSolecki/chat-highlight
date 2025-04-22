@@ -10,6 +10,7 @@ export async function GET({ params }: { params: { username: string } }) {
     }
     const userId = users[0].id;
     await emoteFetcherService.fetchEmotesForChannel(userId);
+    twitchService.getChannelBadges(userId);
     const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
     const stream = new ReadableStream({
         start(controller) {
@@ -59,9 +60,16 @@ function connectToChat(
             const userInfo = parts[1].split("!");
             const username = userInfo[0].substring(userInfo[0].lastIndexOf(":") + 1);
             const id = crypto.randomUUID();
+            const badges =
+                metadata?.badges
+                    ?.split(",")
+                    ?.map((badge) => twitchService.parseBadge(badge, userId))
+                    ?.filter((badge) => badge !== undefined) ?? [];
 
             try {
-                controller.enqueue(`event: chat\ndata: ${JSON.stringify({ id, username, chat, ...metadata })}\n\n`);
+                controller.enqueue(
+                    `event: chat\ndata: ${JSON.stringify({ id, username, chat, ...metadata, badges })}\n\n`,
+                );
             } catch {
                 closeController(controller);
                 ws.close();
